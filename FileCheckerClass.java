@@ -232,8 +232,10 @@ public class FileCheckerClass {
        String folderPath=null;
        BufferedReader bufferedReader = null;
        String dataPath = "";
+       String logPath = "";
 //       C:\\Users\\Administrator\\Desktop\\DataFolder\\";		
        File maindir;
+       int co =0;
         while(true){
         try{
             Scanner sin = new Scanner(System.in);
@@ -241,6 +243,13 @@ public class FileCheckerClass {
             ArrayList <String> modList = new ArrayList<>();
             ArrayList <String> creList = new ArrayList<>();
             ArrayList <String> reList = new ArrayList<>();
+            hashMap1 = new HashMap<String,FileProperties>();
+            hashMap2 = new HashMap<String,FileProperties>();
+//            new added for the stack showing on 18 july 
+        ArrayList<CrModDeOperations> cmdList = new ArrayList<>();
+        ArrayList<MoveOperation> movList = new ArrayList<>();
+        ArrayList<RenameOperation> renList = new ArrayList<>();
+        
             reCount =0;
             moCount =0;
             modCount=0;
@@ -269,27 +278,177 @@ public class FileCheckerClass {
                      System.out.println("Data Loding ...");
                     recursiveFunction(arr,0);
                     dataPath = "C:\\Users\\Administrator\\Desktop\\DataFolder\\";
-//                    URL url = maindir.toURL();
-//                    URLConnection urc = new URLConnection(url) {
-//                        @Override
-//                        public void connect() throws IOException {
-////                            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-//                        }
-//                    };
-//                   
-//                    
-//                    
-//                    maindir = new File("C:\\");
-//                    
-//                    arr = maindir.listFiles();
+                    logPath ="C:\\Users\\Administrator\\Desktop\\LogDataFolder\\"; 
                                         String fpath = creatingMd5(folderPath);
                                         dataPath+=fpath+".txt";
-                                        System.out.println("data path "+dataPath);
+                                        logPath+=fpath+".txt";
+                                        System.out.println("data path "+dataPath+" count loop "+(++co));
                                         File dataFile = new File(dataPath);
-                                        
+                                        File ldataFile = new File(logPath); 
                                         if (dataFile.exists()) {
 							    	// System.out.println(" exists ");
-							    	bufferedReader = new BufferedReader(new FileReader(dataFile));
+			////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//                                    This for stack data Printing and Menu part 
+                                    if(ldataFile.exists()){
+                                         bufferedReader = new BufferedReader(new FileReader(ldataFile));
+							    	String readLine="";
+							    	while ((readLine = bufferedReader.readLine()) != null) {
+						                 System.out.println(readLine);
+						                String rest[] = readLine.split("\\|");
+//                                                                for(String sp : rest){
+//                                                                    System.out.println(" r split "+sp);
+//                                                                }
+                                                                  if(rest[0].equalsIgnoreCase("created") || rest[0].equalsIgnoreCase("modified") || rest[0].equalsIgnoreCase("deleted")){
+                                                                      CrModDeOperations obj = new CrModDeOperations();
+                                                                      obj.setOperation(rest[0]);
+                                                                      obj.setName(rest[1]);
+                                                                      obj.setPlace(rest[2]);
+                                                                      obj.setType(rest[3]);
+                                                                      cmdList.add(obj);
+                                                                      
+                                                                      if(rest[0].equalsIgnoreCase("created")){
+                                                                          creCount++;
+                                                                      }
+                                                                      else if(rest[0].equalsIgnoreCase("modified")){
+                                                                          modCount++;
+                                                                      }
+                                                                      else if(rest[0].equalsIgnoreCase("deleted")){
+                                                                          deCount++;
+                                                                      } 
+                                                                  }  
+                                                                  else if(rest[0].equalsIgnoreCase("moved")){
+                                                                      MoveOperation obj = new MoveOperation();
+                                                                      obj.setName(rest[1]);
+                                                                      obj.setFrom(rest[2]);
+                                                                      obj.setTo(rest[3]);
+                                                                      obj.setType(rest[4]);
+                                                                      movList.add(obj);
+                                                                      moCount++;
+                                                                  }
+                                                                  else if(rest[0].equalsIgnoreCase("renamed")){
+                                                                      RenameOperation obj = new RenameOperation();
+                                                                      obj.setOldName(rest[1]);
+                                                                      obj.setNewName(rest[2]);
+                                                                      obj.setPlace(rest[3]);
+                                                                      obj.setType(rest[4]);
+                                                                      renList.add(obj);
+                                                                      reCount++;
+                                                                  }
+
+						                 
+						            }
+                                                                ////////// Initial display /////////////
+  
+                                                                 System.out.println("\t\tStack of This File ");   
+                                                                 System.out.println("Total Created : "+creCount); 
+                                                                 System.out.println("Name\t\t\tPlace\t\t\tType");
+                                                                 for(CrModDeOperations obj : cmdList){
+                                                                     if(obj.getOperation().equalsIgnoreCase("created")){
+                                                                         System.out.println(obj.getName()+" "+obj.getPlace()+" \t"+obj.getType());
+                                                                     }
+                                                                 }
+                                                                 System.out.println("Total Modified : "+modCount);
+                                                                 System.out.println("Name\t\t\tPlace\t\t\tType");
+                                                                 for(CrModDeOperations obj : cmdList){
+                                                                     if(obj.getOperation().equalsIgnoreCase("modified")){
+                                                                         System.out.println(obj.getName()+" "+obj.getPlace()+" \t"+obj.getType());
+                                                                     }
+                                                                 }
+                                                                 
+                                                                 System.out.println("Total Deleted : "+deCount);
+                                                                 System.out.println("Name\t\t\tPlace\t\t\tType");
+                                                                 for(CrModDeOperations obj : cmdList){
+                                                                     if(obj.getOperation().equalsIgnoreCase("deleted")){
+                                                                         System.out.println(obj.getName()+" "+obj.getPlace()+" \t"+obj.getType());
+                                                                     }
+                                                                 }
+                                                                 
+                                                                 System.out.println("Total Moved : "+moCount);
+                                                                 System.out.println("Name\t\t\t\tFrom\t\t\t\tTo\t\t\tType");
+                                                                 for(MoveOperation obj : movList){
+                                                                     System.out.println(obj.getName()+" "+obj.getFrom()+" "+obj.getTo()+" \t\t"+obj.getType());
+                                                                 }
+                                                                 System.out.println("Total Renamed : "+reCount);
+                                                                 System.out.println("Name\t\t\tRename\t\t\t\tPlace\t\tType");
+                                                                 for(RenameOperation obj : renList){
+                                                                     System.out.println(obj.getOldName()+" "+obj.getNewName()+" "+obj.getPlace()+"\t\t "+obj.getType());
+                                                                 }
+                                                                 while(true){
+                                                                     System.out.println("\t\t\t\tThis Menu for Stack of the Folder Given\nEnter the choice for Displaying \n1.Created \t2.Modified\t 3.Moved\t4.Deleted\t5.Rename\t6.for File Evalvation Process ");
+                                                                     int choice = sin.nextInt();
+                                                                     switch(choice){
+                                                                         case 1:
+//                                                                              created 
+                                                                                System.out.println("Total Created : "+creCount); 
+                                                                                System.out.println("Name\t\t\tPlace\t\t\tType");
+                                                                                for(CrModDeOperations obj : cmdList){
+                                                                                    if(obj.getOperation().equalsIgnoreCase("created")){
+                                                                                        System.out.println(obj.getName()+" "+obj.getPlace()+" \t\t"+obj.getType());
+                                                                                    }
+                                                                                }
+                                                                             break;
+                                                                         case 2:
+//                                                                             Modified
+                                                                                System.out.println("Total Modified : "+modCount);
+                                                                                System.out.println("Name\t\t\tPlace\t\t\tType");
+                                                                                for(CrModDeOperations obj : cmdList){
+                                                                                    if(obj.getOperation().equalsIgnoreCase("modified")){
+                                                                                        System.out.println(obj.getName()+" "+obj.getPlace()+"\t\t "+obj.getType());
+                                                                                    }
+                                                                                }
+                                                                             break;
+                                                                         case 3:
+//                                                                             Moved    
+                                                                                System.out.println("Total Moved : "+moCount);
+                                                                                System.out.println("Name\t\t\t\t\tFrom\t\t\t\t\t\tTo\t\t\tType");
+                                                                                for(MoveOperation obj : movList){
+                                                                                    System.out.println(obj.getName()+" "+obj.getFrom()+" "+obj.getTo()+" \t\t"+obj.getType());
+                                                                                }
+                                                                             break;
+                                                                         case 4:
+//                                                                             Deleted      
+                                                                               System.out.println("Total Deleted : "+deCount);
+                                                                               System.out.println("Name\t\t\tPlace\t\t\tType");
+                                                                                for(CrModDeOperations obj : cmdList){
+                                                                                    if(obj.getOperation().equalsIgnoreCase("deleted")){
+                                                                                        System.out.println(obj.getName()+" "+obj.getPlace()+" \t\t"+obj.getType());
+                                                                                    }
+                                                                                }
+                                                                                    
+                                                                             break;
+                                                                         case 5:
+//                                                                             Renamed          
+                                                                               System.out.println("Total Renamed : "+reCount);
+                                                                                System.out.println("Name\t\t\tRename\t\\t\t\tPlace\t\t\tType");
+                                                                                for(RenameOperation obj : renList){
+                                                                                    System.out.println(obj.getOldName()+" "+obj.getNewName()+" "+obj.getPlace()+" \t\t"+obj.getType());
+                                                                                }
+                                                                             break;
+                                                                         case 6:    
+                                                                             System.out.println("File Evaluation  Processing.......");
+                                                                             break;
+                                                                     }
+                                                                     if(choice==6){
+                                                                     break;
+                                                                     }
+                                                                 }
+                                                                ////////// Menu For stack display /////////////////
+                                        
+                                        
+                                            
+                                    }
+                                    else{
+                                        System.out.println("There is no Logs for this File");
+                                    }
+                                            
+
+         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////               
+                                                                reCount =0;
+                                                                moCount =0;
+                                                                modCount=0;
+                                                                creCount =0;
+                                                                deCount =0;
+                                                                bufferedReader = new BufferedReader(new FileReader(dataFile));
 							    	String readLine="";
 							    	while ((readLine = bufferedReader.readLine()) != null) {
 						                // System.out.println(readLine);
@@ -309,9 +468,18 @@ public class FileCheckerClass {
 //                                                               for(String key:hashMap1.keySet()){
 //                                                                   System.out.println("key "+key+" value "+hashMap1.get(key));
 //                                                               }
-                                                                
+//                                                              for(String key : hashMap2.keySet()){
+//										// System.out.println(" value "+hashMap2.get(key)+" key "+key);
+//										fpObj = hashMap2.get(key);
+//										// System.out.println(" key is "+key);
+//										String datFo = "key "+key+" Name "+fpObj.getName()+" parent path "+fpObj.getParentName()+" parent id "+fpObj.getParentObj()+" checksum "+fpObj.getLastModified()+"\n";
+//										  System.out.println(" data string "+datFo);
+//									 
+//										}  
 						            //////////////////////////////////////////////Comparing Two HashMap ///////////////////////////////////////
 						            String result="";
+                                                            String dataString = "";
+                                                            ArrayList<String> dlist = new ArrayList<>();
 						            for (String key : hashMap2.keySet() ) {
 						            		
 						            	if (hashMap1.containsKey(key)) {
@@ -327,14 +495,18 @@ public class FileCheckerClass {
                                                                                 if(moCount==1){
                                                                                    result="Name\t\tFrom\t\t\t\t\tTo"; 
                                                                                    moList.add(result);
-                                                                                }
+                                                                                  }
                                                                                     if(fpObje.getLastModified().equals("Folder")){
                                                                                     result=fpObje.getName()+" (Folder) \t"+fpObj.getParentName()+" "+fpObje.getParentName();
+                                                                                    dataString ="Moved|"+fpObje.getName()+"|"+fpObj.getParentName()+"|"+fpObje.getParentName()+"|Folder\n";
                                                                                     }
                                                                                     else{
                                                                                     result=fpObje.getName()+" (File) \t"+fpObj.getParentName()+" "+fpObje.getParentName();
+                                                                                    dataString ="Moved|"+fpObje.getName()+"|"+fpObj.getParentName()+"|"+fpObje.getParentName()+"|File\n";
                                                                                     }
                                                                                     moList.add(result);
+//                                                                                    for logdata file
+                                                                                     dlist.add(dataString);
 //						            			System.out.println(" "+fpObje.getName()+" is  Moved from "+fpObj.getParentName()+" to "+fpObje.getParentName());
 						            		}
 
@@ -347,12 +519,16 @@ public class FileCheckerClass {
                                                                                 }
                                                                                     if(fpObje.getLastModified().equals("Folder")){
                                                                                     result=fpObj.getName()+" (Folder) \t"+fpObje.getName()+"\t"+fpObje.getParentName();
+                                                                                    dataString="renamed|"+fpObj.getName()+"|"+fpObje.getName()+"|"+fpObje.getParentName()+"|Folder\n";
                                                                                     }
                                                                                     else{
                                                                                         result=fpObj.getName()+" (File) \t"+fpObje.getName()+"\t"+fpObje.getParentName();
+                                                                                    dataString="renamed|"+fpObj.getName()+"|"+fpObje.getName()+"|"+fpObje.getParentName()+"|File\n";
                                                                                     }
                                                                                     
                                                                                     reList.add(result);
+                                                                                    dlist.add(dataString); // for the log data 
+                                                                                    
 //						            			System.out.println(" Renamed from "+fpObj.getName()+" to "+fpObje.getName()+" in "+fpObje.getParentName());
 						            		}
                                                                         if(!fpObje.getLastModified().equals("Folder")){    
@@ -360,24 +536,19 @@ public class FileCheckerClass {
 						            			 
                                                                                     modCount++;
                                                                                     if(modCount==1){
-                                                                                        result="Name\t\tPlace";
-                                                                   
-                                                                              modList.add(result);
-                                                                                    }
-                                                                                    
+                                                                                        result="Name\t\tPlace";                                                                   
+                                                                                        modList.add(result);
+                                                                                    }                                                                                    
                                                                                         result=fpObje.getName()+"\t"+fpObje.getParentName();
                                                                                         modList.add(result);
-                                                                                    
+                                                                                        dataString = "Modified|"+fpObje.getName()+"|"+fpObje.getParentName()+"|File\n";
+                                                                                        dlist.add(dataString);
 //                                                                                        System.out.println("last data "+fpObj.getLastModified()+"\nnew data "+fpObje.getLastModified());
 //						            				System.out.println(" "+fpObje.getName()+" is Modified in "+fpObj.getParentName()+" this directory ");
 						            		}
                                                                         }
 						            		
-
-
-
-
-
+  
 						            		// System.out.println(result);
 
 
@@ -392,24 +563,27 @@ public class FileCheckerClass {
                                                                         }
                                                                             if(fpObje.getLastModified().equals("Folder")){
                                                                                 result=fpObje.getName()+" (Folder) \t"+fpObje.getParentName();
+                                                                                dataString = "created|"+fpObje.getName()+"|"+fpObje.getParentName()+"|Folder\n";
                                                                             }
                                                                             else{
                                                                                 result=fpObje.getName()+" (File) \t"+fpObje.getParentName();
+                                                                                dataString = "created|"+fpObje.getName()+"|"+fpObje.getParentName()+"|File\n";
                                                                             }
-                                                                            
+                                                                            dlist.add(dataString); // for the log data file 
                                                                             creList.add(result);
                                                                        
 //						            		System.out.println(" Created "+fpObje.getName());
 						            	}
 						            }
-//						            dataFile.delete(); blocked for restections 
+						            dataFile.delete();  //blocked for restections 
 						            createFile(dataFile);
 						            // System.out.println("\n size of the hashMap1 "+hashMap1.size()+"\n\n");
                                                             deCount = hashMap1.size();
 						          
                                                             
                                                             ///////////////////////////////////////////////////////////////////////////////////////
-//                                                            File data displaying 
+//                                                            File data displaying  and creating data for the file storing 
+                                                        
                                                                System.out.println("No of Created :"+creCount);
                                                                if(creCount>0) {
                                                                System.out.println("List of Created");
@@ -450,13 +624,55 @@ public class FileCheckerClass {
                                                               for (String key  : hashMap1.keySet() ) {	
 						            	fpObje = hashMap1.get(key);
                                                                 if(fpObje.getLastModified().equals("Folder")){
-                                                                    System.out.println(fpObje.getName()+" (Folder) \t"+fpObje.getParentName());	 
+                                                                    System.out.println(fpObje.getName()+" (Folder) \t"+fpObje.getParentName());
+                                                                    dataString ="deleted|"+fpObje.getName()+"|"+fpObje.getParentName()+"|Folder\n";
                                                                 }
                                                                 else{
                                                                     System.out.println(fpObje.getName()+" (File)\t"+fpObje.getParentName());	 
+                                                                dataString ="deleted|"+fpObje.getName()+"|"+fpObje.getParentName()+"|File\n";
                                                                 }
-						            	
+						            	dlist.add(dataString);
 						            }
+                                                            ///////// Place for Log file Creating for the folder given by somesh on july 
+                BufferedWriter bw = null;
+		FileWriter fw = null;
+
+		try {
+ 
+			if(ldataFile.exists()){
+                            ldataFile.createNewFile();
+                        }
+
+			// true = append file
+			fw = new FileWriter(ldataFile.getAbsoluteFile(), true);
+			bw = new BufferedWriter(fw);
+                        for(String ldata : dlist){
+                            bw.write(ldata);
+                        }
+// 			System.out.println("Done");
+
+		} catch (IOException e) {
+
+			e.printStackTrace();
+
+		}
+                finally {
+
+			try {
+
+				if (bw != null)
+					bw.close();
+
+				if (fw != null)
+					fw.close();
+
+			} catch (IOException ex) {
+
+				ex.printStackTrace();
+
+			}
+		}
+                                                            
                                                             
                                                             //////////////////////////////////////////////////////////////////////////////////////
 							    }
@@ -464,16 +680,17 @@ public class FileCheckerClass {
 							    {           System.out.println("Folder Monitor fisrt time ");
 							    		createFile(dataFile);							    	 
 							    }
+                                        
                                
                }
                catch(Exception e){
                    
                }
-            
+//            maindir
 //            maindir.c
             //to break the main loop 
             
-            System.out.println(" Enter the Choice\n 1. For Exit \t  otherwise it will continue Check the Other Folder Again (Not the same Folder)");
+            System.out.println(" Enter the Choice\n 1. For Exit \t  otherwise it will continue Check the Other Folder Again ");
             try{
                 
             int choice = sin.nextInt();
@@ -486,6 +703,7 @@ public class FileCheckerClass {
                  
             }
 //            break;
+//    maindir.
         }
         catch(Exception e){
         }
@@ -546,10 +764,11 @@ public class FileCheckerClass {
     
     static void createFile(File dataFile) throws IOException{
 									BufferedWriter bufferedWriter = null;
+                                                                        Writer writer = null;
 									try{
 
 										dataFile.createNewFile();
-										Writer writer = new FileWriter(dataFile);
+										  writer = new FileWriter(dataFile);
 						           
 						           		 bufferedWriter = new BufferedWriter(writer);
 						            
@@ -560,7 +779,11 @@ public class FileCheckerClass {
 										String datFo = key+"|"+fpObj.getName()+"|"+fpObj.getParentName()+"|"+fpObj.getParentObj()+"|"+fpObj.getLastModified()+"\n";
 										 // System.out.println(" data string "+datFo);
 										bufferedWriter.write(datFo);
-										}      
+  
+										}
+//                                                                        writer.close();
+                                                                         
+                                                                                
 									}   
 									catch(Exception e){
 										String s[]= e.toString().split(":");
@@ -570,7 +793,7 @@ public class FileCheckerClass {
 									}
 
                                             	 finally{
-							try{
+							try{     
 								if(bufferedWriter != null) bufferedWriter.close();
 							} catch(Exception e){
 								String s[]= e.toString().split(":");

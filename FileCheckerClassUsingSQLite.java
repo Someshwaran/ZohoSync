@@ -40,8 +40,8 @@ import org.Kernel32;
 //import  
 public class FileCheckerClassUsingSQLite {
     
-	static HashMap<String,FileProperties> hashMap1 = new HashMap<String,FileProperties>();
-	static HashMap<String,FileProperties> hashMap2 = new HashMap<String,FileProperties>();
+  static HashMap<String,FileProperties> hashMap1 = new HashMap<String,FileProperties>();
+  static HashMap<String,FileProperties> hashMap2 = new HashMap<String,FileProperties>();
         static ArrayList<String> hgRenamed = new ArrayList<String>();
         static ArrayList<String> hgMoved = new ArrayList<String>();
         static ArrayList<String> hgModified = new ArrayList<String>();
@@ -107,61 +107,61 @@ public class FileCheckerClassUsingSQLite {
     
     /////////////////////////////////////////////////////////////////////////////////////////////////////
 //    recursive method for the Depth fisrt Search  begins    
-    	static void recursiveFunction(File[] arr,int index) 
-	{
-				try{
-					// terminate condition
-				if(index == arr.length)
-					return;					 
-				// System.out.println(); 
-				
-				// for files
+      static void recursiveFunction(File[] arr,int index) 
+  {
+        try{
+          // terminate condition
+        if(index == arr.length)
+          return;          
+        // System.out.println(); 
+        
+        // for files
                                 String rs [] = FileIdGetter(arr[index]).split("\\|");
-				if(arr[index].isFile())
-					{
-						 
-						hashMap2.put(rs[0], fpObjectCreater(arr[index]));
-					}
-				// for sub-directories
-				else if(arr[index].isDirectory())
-				{
+        if(arr[index].isFile())
+          {
+             
+            hashMap2.put(rs[0], fpObjectCreater(arr[index]));
+          }
+        // for sub-directories
+        else if(arr[index].isDirectory())
+        {
  
-//						fpObj = fpObjectCreater(arr[index]);
-						// System.out.println(" objectId "+objectId+" folder ");
-						hashMap2.put(rs[0], fpObjectCreater(arr[index]));
+//            fpObj = fpObjectCreater(arr[index]);
+            // System.out.println(" objectId "+objectId+" folder ");
+            hashMap2.put(rs[0], fpObjectCreater(arr[index]));
  
-					// recursion for sub-directories
-					recursiveFunction(arr[index].listFiles(), 0);
-				}
-				
-				// recursion for main directory
-				recursiveFunction(arr,++index);
-				}
-				catch(Exception e){
-					String s[]= e.toString().split(":");
-//								System.out.println("Error "+ s[1]+" string refun "+e.toString());
-				}
-	}
+          // recursion for sub-directories
+          recursiveFunction(arr[index].listFiles(), 0);
+        }
+        
+        // recursion for main directory
+        recursiveFunction(arr,++index);
+        }
+        catch(Exception e){
+          String s[]= e.toString().split(":");
+//                System.out.println("Error "+ s[1]+" string refun "+e.toString());
+        }
+  }
 
 ///////////// end method     
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         
-        	static FileProperties fpObjectCreater(File fp) throws IOException{
+          static FileProperties fpObjectCreater(File fp) throws IOException{
 
-			fpObj = new FileProperties();
-			 
-			try{
-				// System.out.println(" name "+fp.getName()+" parent "+fp.getParentFile().getName()+" size "+fp.length());
-				// fp.getParentFile().getName()
+      fpObj = new FileProperties();
+       
+      try{
+        // System.out.println(" name "+fp.getName()+" parent "+fp.getParentFile().getName()+" size "+fp.length());
+        // fp.getParentFile().getName()
                                 String res[] = FileIdGetter(fp.getParentFile()).split("\\|");
-			fpObj.setParentName(fp.getParent());
-			fpObj.setParentObj(res[0]);
-			fpObj.setName(fp.getName());
+      fpObj.setParentName(fp.getParent());
+      fpObj.setParentObj(res[0]);
+      fpObj.setName(fp.getName());
                                 res = FileIdGetter(fp).split("\\|");
                         fpObj.setCreatedTime(res[1]);
                         fpObj.setModifiedTime(res[2]);
-				// System.out.println(" file last modified "+fp.lastModified()+" name "+fp.getName());
-			// fpObj.setSize(fp.length());
+        // System.out.println(" file last modified "+fp.lastModified()+" name "+fp.getName());
+      // fpObj.setSize(fp.length());
                         if(fp.isFile())
                         {fpObj.setLastModified( checkSum(fp.getAbsolutePath()));
 //                            System.out.println(" in the if for file "+fiMap.get(creatingMd5(fp.getAbsolutePath())));
@@ -174,14 +174,14 @@ public class FileCheckerClassUsingSQLite {
                         fpObj.setLastModified("Folder");
                         }
                         
-			}
-			catch(Exception e){
+      }
+      catch(Exception e){
 
-					String s[]= e.toString().split(":");
-					System.out.println("Error "+ s[1]);
-			}
-		return fpObj;	
-	}
+          String s[]= e.toString().split(":");
+          System.out.println("Error "+ s[1]);
+      }
+    return fpObj; 
+  }
 ///////////////////////////////////////////////////////////// this part had the displaying methods for logdata ////////////////////////////////////////////////////////////////////////////
                  
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -190,7 +190,7 @@ public class FileCheckerClassUsingSQLite {
        BufferedReader bufferedReader = null;
        String dataPath = "";
        String logPath = "";
-//       C:\\Users\\Administrator\\Desktop\\DataFolder\\";		
+//       C:\\Users\\Administrator\\Desktop\\DataFolder\\";    
        File maindir;
        int co =0;
         while(true){
@@ -239,6 +239,12 @@ public class FileCheckerClassUsingSQLite {
                     File arr[] = maindir.listFiles();
                     System.out.println("Data Loding ...");
                     recursiveFunction(arr,0);
+                      String rs1 [] = FileIdGetter(maindir).split("\\|");
+                                            hashMap2.put(rs1[0], fpObjectCreater(maindir));
+                    for(String key : hashMap2.keySet()){
+                        fpObj = hashMap2.get(key);
+                        System.out.println("key "+key+" name : "+fpObj.getName()+" parent id  : "+fpObj.getParentObj()+" parent path :"+fpObj.getParentName()+" check sum "+fpObj.getLastModified());
+                    }
                     dataPath = "C:\\Users\\Administrator\\Desktop\\DataFolder\\";
                     logPath ="C:\\Users\\Administrator\\Desktop\\LogDataFolder\\"; 
                                         String fpath = creatingMd5(folderPath);
@@ -247,6 +253,7 @@ public class FileCheckerClassUsingSQLite {
                                         rootFolder="rootfo"+fpath;
                                         rootLog= "rootl"+fpath;
                                         rootLogF = "rootlf"+fpath;
+                                        System.out.println(" file "+rootFile+"\n folder "+rootFolder+"\n log "+rootLog+"\n log folder "+rootLogF);
                                    ////////////////////// table name set ends 
                                   String Query ="";
                                    Connection con = null;
@@ -264,7 +271,7 @@ public class FileCheckerClassUsingSQLite {
                                        if(st.execute(Query)){
                                            System.out.println(rootFile+" is created  ");
                                        }
-                                       Query="create table if not exists "+rootFolder+" (id varchar(100),name varchar(1000),path TEXT(20000));";
+                                       Query="create table if not exists "+rootFolder+" (fid varchar(100),fname varchar(1000),fparentid varchar(100),  path TEXT(20000));";
                                       if(st.execute(Query)){
                                            System.out.println(rootFolder+" is created  ");
                                        }
@@ -272,7 +279,7 @@ public class FileCheckerClassUsingSQLite {
                                     if(st.execute(Query)){
                                            System.out.println(rootLog+" is created  ");
                                        }
-                                       Query =" create table if not exists "+rootLogF+" (id varchar(100), path TEXT(20000));";
+                                       Query =" create table if not exists "+rootLogF+" (fid varchar(100), path TEXT(20000));";
                                        if(st.execute(Query)){
                                            System.out.println(rootLogF+" is created  ");
                                        }
@@ -280,36 +287,184 @@ public class FileCheckerClassUsingSQLite {
                                        rs = st.executeQuery(Query);
                                        if(rs.next()){
 //                                            here we data verification for the file and folder's
-                                            Query = "select * from "+rootFile+";";
+                                            Query = "select id ,name ,parentid,fname,path,checksum from "+rootFile+" inner join "+rootFolder+" on "+rootFile+".parentid = "+rootFolder+".fid"+";";
                                             ResultSet rsf = st.executeQuery(Query);
-                                            Query = "select * from "+rootFolder+";";
-                                            ResultSet rsfol = st.executeQuery(Query);
+                                            
                                             System.out.println("file properites \n");
-                                            while(rsf.next()){
-                                                
-                                                System.out.println(" "+rsf.getString(1)+" "+rsf.getString(2)+" "+rsf.getString(3)+" ");
-                                            }
+                                            while(rsf.next()){                                                
+                                                System.out.println(" file "+rsf.getString(1)+" "+rsf.getString(2)+" "+rsf.getString(3)+" "+rsf.getString(4)+" "+rsf.getString(5)+" "+rsf.getString(6));
+ 
+//                                                /////////// put the data in the hashmap 1
+                                                fpObj = new FileProperties();
+                            fpObj.setName(rsf.getString(2));
+                            fpObj.setParentName(rsf.getString(5)+"\\"+rsf.getString(4));
+                            fpObj.setParentObj(rsf.getString(3));
+                            fpObj.setLastModified(rsf.getString(6));
+
+                            hashMap1.put(rsf.getString(1),fpObj);
+ 
+ 
+                                            }                                            
                                             rsf.close();
+//                                            this is for getting the root folder files 
+ 
+                                           ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                                              Query = "select * from "+rootFolder+";";
+                                            ResultSet rsfol = st.executeQuery(Query);
                                             System.out.println("\n folder properties ");
                                             while(rsfol.next())
                                             {
-                                                System.out.println(" "+rsfol.getString(1)+" "+rsfol.getString(2)+" "+rsfol.getString(3));
+                                                System.out.println(" folder "+rsfol.getString(1)+" "+rsfol.getString(2)+" "+rsfol.getString(3)+" "+rsfol.getString(4));
+                                                 /////////// put the data in the hashmap 1
+                                                
+                                                 fpObj = new FileProperties();
+                            fpObj.setName(rsf.getString(2));
+                            fpObj.setParentName(rsf.getString(4));
+                            fpObj.setParentObj(rsf.getString(3));
+                            fpObj.setLastModified("Folder");
+
+                            hashMap1.put(rsf.getString(1),fpObj);
                                             }
                                             rsfol.close();
+//                                          below for matching the two hashMaps
+                                                                reCount = 0;
+                                                                moCount = 0;
+                                                                modCount = 0;
+                                                                creCount = 0;
+                                                                deCount = 0;
+                                          //////////////////////////////////////////////Comparing Two HashMap ///////////////////////////////////////
+                        String result="";
+                                                            String dataString = "";
+                                                            ArrayList<String> dlist = new ArrayList<>();
+                        for (String key : hashMap2.keySet() ) {
+                            
+                          if (hashMap1.containsKey(key)) {
+                            /////getting  size of the files for both hashmap's///
+                             
+                            fpObj = hashMap1.get(key);
+                            fpObje = hashMap2.get(key);
+                                                                        
+                            if (!(fpObj.getParentObj().equals(fpObje.getParentObj()))) {
+                                
+                                                                                moCount++;
+                                                                                if(moCount==1){
+                                                                                   result="Name\t\tFrom\t\t\t\t\tTo"; 
+                                                                                   moList.add(result);
+                                                                                  }
+                                                                                    if(fpObje.getLastModified().equals("Folder")){
+                                                                                    result=fpObje.getName()+" (Folder) \t"+fpObj.getParentName()+" "+fpObje.getParentName();
+//                                                                                    dataString ="Moved|"+key+"|"+fpObje.getName()+"|"+fpObj.getParentName()+"|"+fpObje.getParentName()+"|Folder\n";
+                                                                                        Query = "update "+rootFolder+" set fparentid = '"+fpObje.getParentObj()+"' , path = '"+fpObje.getParentName()+"' where fid = '"+key+"';";
+                                                                                        st.executeUpdate(Query);
+                                                                                    }
+                                                                                    else{
+                                                                                    result=fpObje.getName()+" (File) \t"+fpObj.getParentName()+" "+fpObje.getParentName();
+                                                                                    Query = "update "+rootFile+" set parentid = '"+fpObje.getParentObj()+"' where id ='"+key+"';";
+//                                                                                    dataString ="Moved|"+key+"|"+fpObje.getName()+"|"+fpObj.getParentName()+"|"+fpObje.getParentName()+"|File\n";
+                                                                                     st.executeUpdate(Query);
+                                                                                    }
+                                                                                    moList.add(result);
+//                                                                                    Here for updating the data into the database 
+                                                                                    
+//                                                                                    for logdata file
+//                                                                                     dlist.add(dataString);
+//                              System.out.println(" "+fpObje.getName()+" is  Moved from "+fpObj.getParentName()+" to "+fpObje.getParentName());
+                            }
+
+                            if (!(fpObj.getName()).equals(fpObje.getName())) {
+                               
+                                                                                reCount++;
+                                                                                if(reCount==1){
+                                                                                    result="From\t\tTo\t\tPlace";
+                                                                                    reList.add(result);
+                                                                                }
+                                                                                    if(fpObje.getLastModified().equals("Folder")){
+                                                                                    result=fpObj.getName()+" (Folder) \t"+fpObje.getName()+"\t"+fpObje.getParentName();
+                                                                                    Query = "update "+rootFolder+" set fname ='"+fpObje.getName()+"' where fid='"+key+"';";
+                                                                                    st.executeUpdate(Query);
+//                                                                                    dataString="renamed|"+key+"|"+fpObj.getName()+"|"+fpObje.getName()+"|"+fpObje.getParentName()+"|Folder\n";
+                                                                                    }
+                                                                                    else{
+                                                                                        result=fpObj.getName()+" (File) \t"+fpObje.getName()+"\t"+fpObje.getParentName();
+                                                                                        Query = "update "+rootFile+" set name = '"+fpObje.getName()+"' where id = '"+key+"';";
+                                                                                        st.executeUpdate(Query);
+//                                                                                    dataString="renamed|"+key+"|"+fpObj.getName()+"|"+fpObje.getName()+"|"+fpObje.getParentName()+"|File\n";
+                                                                                    }
+                                                                                    
+                                                                                    reList.add(result);
+//                                                                                    dlist.add(dataString); // for the log data 
+                                                                                    
+//                              System.out.println(" Renamed from "+fpObj.getName()+" to "+fpObje.getName()+" in "+fpObje.getParentName());
+                            }
+                                                                        if(!fpObje.getLastModified().equals("Folder")){    
+                            if (!fpObj.getLastModified().equals(fpObje.getLastModified())) {
+                               
+                                                                                    modCount++;
+                                                                                    if(modCount==1){
+                                                                                        result="Name\t\tPlace";                                                                   
+                                                                                        modList.add(result);
+                                                                                    }                                                                                    
+                                                                                        result=fpObje.getName()+"\t"+fpObje.getParentName();
+                                                                                        modList.add(result);
+//                                                                                        dataString = "Modified|"+key+"|"+fpObje.getName()+"|"+fpObje.getParentName()+"|File|"+fpObje.getModifiedTime()+"\n";
+//                                                                                        dlist.add(dataString);
+                                                                                           Query = "update "+rootFile+" set checksum ='"+fpObje.getLastModified()+"' where id ='"+key+"';";
+                                                                                           st.executeUpdate(Query);
+                                                                                        System.out.println("last data "+fpObj.getLastModified()+"\nnew data "+fpObje.getLastModified());
+//                                System.out.println(" "+fpObje.getName()+" is Modified in "+fpObj.getParentName()+" this directory ");
+                            }
+                                                                        }
+                            
+  
+                            // System.out.println(result);
+
+
+                             hashMap1.remove(key);  
+                          }
+                          else{
+                            fpObje = hashMap2.get(key);
+                                                                        creCount++;
+                                                                        if(creCount==1){
+                                                                        result="Name\t\t\tPlace";
+                                                                        creList.add(result);
+                                                                        }
+                                                                            if(fpObje.getLastModified().equals("Folder")){
+                                                                                result=fpObje.getName()+" (Folder) \t"+fpObje.getParentName();
+                                                                             Query = "insert into "+rootFolder+" values('"+key+"','"+fpObje.getName()+"','"+fpObje.getParentObj()+"','"+fpObje.getParentName()+"');";
+                                                                              st.execute(Query);
+//                                                                                dataString = "created|"+key+"|"+fpObje.getName()+"|"+fpObje.getParentName()+"|Folder|"+fpObje.getCreatedTime()+"\n";
+                                                                            }
+                                                                            else{
+                                                                                result=fpObje.getName()+" (File) \t"+fpObje.getParentName();
+                                                                                Query = "insert into "+rootFile+" values('"+key+"','"+fpObje.getName()+"','"+fpObje.getParentObj()+"','"+fpObje.getLastModified()+"');";
+                                                                                st.execute(Query);
+//                                                                                dataString = "created|"+key+"|"+fpObje.getName()+"|"+fpObje.getParentName()+"|File|"+fpObje.getCreatedTime()+"\n";
+                                                                            }
+//                                                                            dlist.add(dataString); // for the log data file 
+                                                                            creList.add(result);
+                                                                       
+//                            System.out.println(" Created "+fpObje.getName());
+                          }
+                        }
+ 
                                        }
                                        else{
                                            ////////////////////inserting data into the corresponding tables 
-                                           Query = "in";
+                                         
                                            for(String key : hashMap2.keySet()){
                                                FileProperties obj = hashMap2.get(key);
+                                                 System.out.println("key "+key+" name : "+obj.getName()+" parent id  : "+obj.getParentObj()+" parent path :"+obj.getParentName()+" check sum "+obj.getLastModified());
                                                if(obj.getLastModified().equalsIgnoreCase("folder")){
 //                                                for Folder table insertion 
-                                                Query = "insert into "+rootFolder+" values('"+obj.getParentObj()+"','"+obj.getName()+"','"+obj.getParentName()+"')";
+                                                   System.out.println("inside the Folder if ");
+                                                Query = "insert into "+rootFolder+" values('"+key+"','"+obj.getName()+"','"+obj.getParentObj()+"','"+obj.getParentName()+"');";
                                                 st.execute(Query);
+                                                
                                                }
                                                else{
+                                                   System.out.println("insert in the else file ");
 //                                                   for File table insertion
-                                                  Query = "insert into "+rootFile+" values('"+key+"','"+obj.getName()+"','"+obj.getParentObj()+"','"+obj.getLastModified()+"')";
+                                                  Query = "insert into "+rootFile+" values('"+key+"','"+obj.getName()+"','"+obj.getParentObj()+"','"+obj.getLastModified()+"');";
                                                   st.execute(Query);                                                  
                                                }
                                            }
@@ -342,211 +497,85 @@ public class FileCheckerClassUsingSQLite {
                                    
                                    
                                    
-//                                   
-//                                        dataPath+=fpath+".txt";
-//                                   
-//                                        System.out.println("data path "+dataPath+" count loop "+(++co));
-//                                        File dataFile = new File(dataPath);
-//                                         
-//                                        if (dataFile.exists()) {
-							    	// System.out.println(" exists ");
-			////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//                                    This for stack data Printing and Menu part 
+ 
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//                                 This for stack data Printing and Menu part 
                                      
                                             
 
          ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////               
-//                                                                reCount =0;
-//                                                                moCount =0;
-//                                                                modCount=0;
-//                                                                creCount =0;
-//                                                                deCount =0;
-//                                                                bufferedReader = new BufferedReader(new FileReader(dataFile));
-//							    	String readLine="";
-//							    	while ((readLine = bufferedReader.readLine()) != null) {
-//						                // System.out.println(readLine);
-//						                String rest[] = readLine.split("\\|");
-////                                                                for(String sp : rest){
-////                                                                    System.out.println(" r split "+sp);
-////                                                                }
-//						                fpObj = new FileProperties();
-//						                fpObj.setName(rest[1]);
-//						                fpObj.setParentName(rest[2]);
-//						                fpObj.setParentObj(rest[3]);
-//						                fpObj.setLastModified(rest[4]);
-//
-//						                hashMap1.put(rest[0],fpObj);
-//						            }
-// 
-//						            //////////////////////////////////////////////Comparing Two HashMap ///////////////////////////////////////
-//						            String result="";
-//                                                            String dataString = "";
-//                                                            ArrayList<String> dlist = new ArrayList<>();
-//						            for (String key : hashMap2.keySet() ) {
-//						            		
-//						            	if (hashMap1.containsKey(key)) {
-//						            		/////getting  size of the files for both hashmap's///
-//						            		 
-//
-//						            		fpObj = hashMap1.get(key);
-//						            		fpObje = hashMap2.get(key);
-//                                                                        
-//						            		if (!(fpObj.getParentObj().equals(fpObje.getParentObj()))) {
-//						            			  
-//                                                                                moCount++;
-//                                                                                if(moCount==1){
-//                                                                                   result="Name\t\tFrom\t\t\t\t\tTo"; 
-//                                                                                   moList.add(result);
-//                                                                                  }
-//                                                                                    if(fpObje.getLastModified().equals("Folder")){
-//                                                                                    result=fpObje.getName()+" (Folder) \t"+fpObj.getParentName()+" "+fpObje.getParentName();
-//                                                                                    dataString ="Moved|"+key+"|"+fpObje.getName()+"|"+fpObj.getParentName()+"|"+fpObje.getParentName()+"|Folder\n";
-//                                                                                    }
-//                                                                                    else{
-//                                                                                    result=fpObje.getName()+" (File) \t"+fpObj.getParentName()+" "+fpObje.getParentName();
-//                                                                                    dataString ="Moved|"+key+"|"+fpObje.getName()+"|"+fpObj.getParentName()+"|"+fpObje.getParentName()+"|File\n";
-//                                                                                    }
-//                                                                                    moList.add(result);
-////                                                                                    for logdata file
-//                                                                                     dlist.add(dataString);
-////						            			System.out.println(" "+fpObje.getName()+" is  Moved from "+fpObj.getParentName()+" to "+fpObje.getParentName());
-//						            		}
-//
-//						            		if (!(fpObj.getName()).equals(fpObje.getName())) {
-//						            			 
-//                                                                                reCount++;
-//                                                                                if(reCount==1){
-//                                                                                    result="From\t\tTo\t\tPlace";
-//                                                                                    reList.add(result);
-//                                                                                }
-//                                                                                    if(fpObje.getLastModified().equals("Folder")){
-//                                                                                    result=fpObj.getName()+" (Folder) \t"+fpObje.getName()+"\t"+fpObje.getParentName();
-//                                                                                    dataString="renamed|"+key+"|"+fpObj.getName()+"|"+fpObje.getName()+"|"+fpObje.getParentName()+"|Folder\n";
-//                                                                                    }
-//                                                                                    else{
-//                                                                                        result=fpObj.getName()+" (File) \t"+fpObje.getName()+"\t"+fpObje.getParentName();
-//                                                                                    dataString="renamed|"+key+"|"+fpObj.getName()+"|"+fpObje.getName()+"|"+fpObje.getParentName()+"|File\n";
-//                                                                                    }
-//                                                                                    
-//                                                                                    reList.add(result);
-//                                                                                    dlist.add(dataString); // for the log data 
-//                                                                                    
-////						            			System.out.println(" Renamed from "+fpObj.getName()+" to "+fpObje.getName()+" in "+fpObje.getParentName());
-//						            		}
-//                                                                        if(!fpObje.getLastModified().equals("Folder")){    
-//						            		if (!fpObj.getLastModified().equals(fpObje.getLastModified())) {
-//						            			 
-//                                                                                    modCount++;
-//                                                                                    if(modCount==1){
-//                                                                                        result="Name\t\tPlace";                                                                   
-//                                                                                        modList.add(result);
-//                                                                                    }                                                                                    
-//                                                                                        result=fpObje.getName()+"\t"+fpObje.getParentName();
-//                                                                                        modList.add(result);
-//                                                                                        dataString = "Modified|"+key+"|"+fpObje.getName()+"|"+fpObje.getParentName()+"|File|"+fpObje.getModifiedTime()+"\n";
-//                                                                                        dlist.add(dataString);
-//                                                                                        System.out.println("last data "+fpObj.getLastModified()+"\nnew data "+fpObje.getLastModified());
-////						            				System.out.println(" "+fpObje.getName()+" is Modified in "+fpObj.getParentName()+" this directory ");
-//						            		}
-//                                                                        }
-//						            		
-//  
-//						            		// System.out.println(result);
-//
-//
-//						            		 hashMap1.remove(key);	
-//						            	}
-//						            	else{
-//						            		fpObje = hashMap2.get(key);
-//                                                                        creCount++;
-//                                                                        if(creCount==1){
-//                                                                        result="Name\t\t\tPlace";
-//                                                                        creList.add(result);
-//                                                                        }
-//                                                                            if(fpObje.getLastModified().equals("Folder")){
-//                                                                                result=fpObje.getName()+" (Folder) \t"+fpObje.getParentName();
-//                                                                                dataString = "created|"+key+"|"+fpObje.getName()+"|"+fpObje.getParentName()+"|Folder|"+fpObje.getCreatedTime()+"\n";
-//                                                                            }
-//                                                                            else{
-//                                                                                result=fpObje.getName()+" (File) \t"+fpObje.getParentName();
-//                                                                                dataString = "created|"+key+"|"+fpObje.getName()+"|"+fpObje.getParentName()+"|File|"+fpObje.getCreatedTime()+"\n";
-//                                                                            }
-//                                                                            dlist.add(dataString); // for the log data file 
-//                                                                            creList.add(result);
-//                                                                       
-////						            		System.out.println(" Created "+fpObje.getName());
-//						            	}
-//						            }
-//						            dataFile.delete();  //blocked for restections 
-//						            createFile(dataFile);
-//						            // System.out.println("\n size of the hashMap1 "+hashMap1.size()+"\n\n");
-//                                                            deCount = hashMap1.size();
-//						          
-//                                                            
-//                                                            ///////////////////////////////////////////////////////////////////////////////////////
-////                                                            File data displaying  and creating data for the file storing 
-//                                                        
-//                                                               System.out.println("No of Created :"+creCount);
-//                                                               if(creCount>0) {
-//                                                               System.out.println("List of Created");
-//                                                               }
-////                                                               System.out.println(" size of the file creates "+creList.size());
-//                                                              for(String s:creList){
-//                                                                  System.out.println(s);
-//                                                              } 
-//                                                              System.out.println("No of  Renamed :"+reCount);
-//                                                              if(reCount>0){
-//                                                               System.out.println("List of Renamed");
-//                                                              }
-////                                                            System.out.println("size of the file renamed "+reList.size());
-//                                                              for(String s:reList){
-//                                                                  System.out.println(s);
-//                                                              }
-//                                                               System.out.println("No of  Moved :"+moCount);
-//                                                               if(moCount>0) {
-//                                                               System.out.println("List of  Moved");
-//                                                               }
-////                                                               System.out.println("size of the Molist "+moList.size());
-//                                                               for(String s: moList){
-//                                                                   System.out.println(s);
-//                                                               }
-//                                                               System.out.println("No of File Modified :"+modCount);
-//                                                               if(modCount>0) {
-//                                                                   System.out.println("List of File Modified");
-//                                                               }
-////                                                               System.out.println("size of the modify list "+modList.size());
-//                                                               for(String s: modList){
-//                                                                   System.out.println(s);
-//                                                               }
-////                                                                
-//                                                               System.out.println("No of  Deleted :"+deCount);
-//                                                                if(deCount>0) {
-//                                                                System.out.println("List of  Deleted");
-//                                                                }
-//                                                              for (String key  : hashMap1.keySet() ) {	
-//						            	fpObje = hashMap1.get(key);
-//                                                                if(fpObje.getLastModified().equals("Folder")){
-//                                                                    System.out.println(fpObje.getName()+" (Folder) \t"+fpObje.getParentName());
+ 
+                                                            deCount = hashMap1.size();
+                      
+                                                            
+                                                            ///////////////////////////////////////////////////////////////////////////////////////
+//                                                            File data displaying  and creating data for the file storing 
+                                                        
+                                                               System.out.println("No of Created :"+creCount);
+                                                               if(creCount>0) {
+                                                               System.out.println("List of Created");
+                                                               }
+//                                                               System.out.println(" size of the file creates "+creList.size());
+                                                              for(String s:creList){
+                                                                  System.out.println(s);
+                                                              } 
+                                                              System.out.println("No of  Renamed :"+reCount);
+                                                              if(reCount>0){
+                                                               System.out.println("List of Renamed");
+                                                              }
+//                                                            System.out.println("size of the file renamed "+reList.size());
+                                                              for(String s:reList){
+                                                                  System.out.println(s);
+                                                              }
+                                                               System.out.println("No of  Moved :"+moCount);
+                                                               if(moCount>0) {
+                                                               System.out.println("List of  Moved");
+                                                               }
+//                                                               System.out.println("size of the Molist "+moList.size());
+                                                               for(String s: moList){
+                                                                   System.out.println(s);
+                                                               }
+                                                               System.out.println("No of File Modified :"+modCount);
+                                                               if(modCount>0) {
+                                                                   System.out.println("List of File Modified");
+                                                               }
+//                                                               System.out.println("size of the modify list "+modList.size());
+                                                               for(String s: modList){
+                                                                   System.out.println(s);
+                                                               }
+//                                                                
+                                                               System.out.println("No of  Deleted :"+deCount);
+                                                                if(deCount>0) {
+                                                                System.out.println("List of  Deleted");
+                                                                }
+                                                              for (String key  : hashMap1.keySet() ) {  
+                          fpObje = hashMap1.get(key);
+                                                                if(fpObje.getLastModified().equals("Folder")){
+                                                                    System.out.println(fpObje.getName()+" (Folder) \t"+fpObje.getParentName());
+                                                                    Query = "delete from "+rootFolder+" where fid='"+key+"';";
+                                                                    st.execute(Query);
 //                                                                    dataString ="deleted|"+key+"|"+fpObje.getName()+"|"+fpObje.getParentName()+"|Folder\n";
-//                                                                }
-//                                                                else{
-//                                                                    System.out.println(fpObje.getName()+" (File)\t"+fpObje.getParentName());	 
+                                                                }
+                                                                else{
+                                                                    System.out.println(fpObje.getName()+" (File)\t"+fpObje.getParentName());   
+                                                                    Query= " delete from "+rootFile+" where id='"+key+"';";
+                                                                    st.execute(Query);
 //                                                                dataString ="deleted|"+key+"|"+fpObje.getName()+"|"+fpObje.getParentName()+"|File\n";
-//                                                                }
-//						            	dlist.add(dataString);
-//						            }
-//                                                            ///////// Place for Log file Creating for the folder given by somesh on july 
-//               
-//                                                            
-//                                                            
-//                                                            //////////////////////////////////////////////////////////////////////////////////////
-//							    }
-//							    else
-//							    {           System.out.println("Folder Monitor fisrt time ");
-//							    		createFile(dataFile);							    	 
-//							    }
-//                                        
-//                               
+                                                                }
+//                          dlist.add(dataString);
+                        }
+                                                            ///////// Place for Log file Creating for the folder given by somesh on july 
+               
+                                                            
+                                                            
+                                                            //////////////////////////////////////////////////////////////////////////////////////
+//                  }
+//                  else
+//                  {           System.out.println("Folder Monitor fisrt time ");
+//                      createFile(dataFile);                    
+//                  }
+                                        
+                               
                }
                catch(Exception e){
                    
@@ -631,3 +660,4 @@ public class FileCheckerClassUsingSQLite {
  
 } // End of the class
 
+ 

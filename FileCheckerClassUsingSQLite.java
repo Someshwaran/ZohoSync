@@ -58,10 +58,10 @@ public class FileCheckerClassUsingSQLite {
         static int creCount =0;
         static int deCount= 0;
         static String md5 = "";
-               static   String rootFile="";
-               static String rootFolder = "";
-                static String rootLog= "";
-                static String rootLogF= "";
+        static   String rootFile="";
+        static String rootFolder = "";
+        static String rootLog= "";
+        static String rootLogF= "";
         
        
  
@@ -165,10 +165,14 @@ public class FileCheckerClassUsingSQLite {
                                 res = FileIdGetter(fp).split("\\|");
                         fpObj.setCreatedTime(res[1]);
                         fpObj.setModifiedTime(res[2]);
+                      
 				// System.out.println(" file last modified "+fp.lastModified()+" name "+fp.getName());
 			// fpObj.setSize(fp.length());
                         if(fp.isFile())
-                        {fpObj.setLastModified( checkSum(fp.getAbsolutePath()));
+                        {   fpObj.setLastModified( checkSum(fp.getAbsolutePath()));
+                              Typedetection tObj= new Typedetection();
+//                                      tObj.fileType(fp);
+                        fpObj.setFileFormat(tObj.fileType(fp));
 //                            System.out.println(" in the if for file "+fiMap.get(creatingMd5(fp.getAbsolutePath())));
                         }
                         else
@@ -177,6 +181,7 @@ public class FileCheckerClassUsingSQLite {
 //                            File file [] = fp.listFiles();
 //                           recursiveFolder(file,0,md);
                         fpObj.setLastModified("Folder");
+//                        fpObj.setFileFormat("Folder");
                         }
                         
 			}
@@ -191,10 +196,10 @@ public class FileCheckerClassUsingSQLite {
                 static void lCreatedDisplay(ArrayList<CrModDeOperations> cList, Statement st){
                     TreeSet<String> fileId = new TreeSet<String>();
                      System.out.println("Total Created : "+creCount); 
-                     System.out.println("Name\t\t\tPlace\t\t\tType");
+                     System.out.println("Name\t\t\tPlace\t\t\tType\t\t\tFormat");
                        for(CrModDeOperations obj : cList){
                                          if(obj.getOperation().equalsIgnoreCase("created")){
-                                                   System.out.println(obj.getName()+" "+obj.getPlace()+" \t\t"+obj.getType());
+                                                   System.out.println(obj.getName()+" "+obj.getPlace()+" \t\t"+obj.getType()+"\t\t"+obj.getFormat());
 //                                         This part for the showing the restored file  
                                               fileId.add(obj.getId());
                                          }
@@ -272,10 +277,10 @@ public class FileCheckerClassUsingSQLite {
                 static void lModifiedDisplay(ArrayList<CrModDeOperations> mList, Statement st){
                     TreeSet<String> fileId = new TreeSet<String>();
                     System.out.println("Total Modified : "+modCount);
-                    System.out.println("Name\t\t\tPlace\t\t\tType");
+                    System.out.println("Name\t\t\tPlace\t\t\tType\t\tFormat");
                         for(CrModDeOperations obj : mList){
                                if(obj.getOperation().equalsIgnoreCase("modified")){
-                                      System.out.println(obj.getName()+" "+obj.getPlace()+"\t\t "+obj.getType());
+                                      System.out.println(obj.getName()+" "+obj.getPlace()+"\t\t "+obj.getType()+"\t\t"+obj.getFormat());
 //                               This part for finding the Highest modified file  
                                     fileId.add(obj.getId());
                                }
@@ -555,7 +560,7 @@ public class FileCheckerClassUsingSQLite {
                                    try{
                                        con = DriverManager.getConnection("jdbc:sqlite:C:\\SQLite\\foldertables.db");
                                        st  = con.createStatement();
-                                       Query =" create table if not exists "+rootFile+" ( id varchar(100) PRIMARY KEY , name varchar(1000) not null , parentid varhcar(100) not null , checksum TEXT(20000) not null);";                                       
+                                       Query =" create table if not exists "+rootFile+" ( id varchar(100) PRIMARY KEY , name varchar(1000) not null , parentid varhcar(100) not null , checksum TEXT(20000) not null, format varchar(100) not null);";                                       
                                        if(st.execute(Query)){
                                            System.out.println(rootFile+" is created  ");
                                        }
@@ -563,19 +568,35 @@ public class FileCheckerClassUsingSQLite {
                                       if(st.execute(Query)){
                                            System.out.println(rootFolder+" is created  ");
                                        }
-                                       Query = "create table if not exists "+rootLog+" (sno  INTEGER PRIMARY KEY AUTOINCREMENT , operation varchar(20) not null, id varchar(100) not null, name varchar(1000) not null, parentid varchar(100) not null ,type varchar(20) not null );";
+                                       Query = "create table if not exists "+rootLog+" (sno  INTEGER PRIMARY KEY AUTOINCREMENT , operation varchar(20) not null, id varchar(100) not null, name varchar(1000) not null, parentid varchar(100) not null ,type varchar(20) not null ,format varhcar(100));";
                                     if(st.execute(Query)){
                                            System.out.println(rootLog+" is created  ");
                                        }
-//                                       Query =" create table if not exists "+rootLogF+" (fid varchar(100), path TEXT(20000));";
-//                                       if(st.execute(Query)){
-//                                           System.out.println(rootLogF+" is created  ");
-//                                       }
+                                       Query =" create table if not exists "+rootLogF+" (lid varchar(100) PRIMARY KEY ,fname varchar(1000) not null ,fparentid varchar(100) not null, path TEXT(20000) not null );";
+                                       if(st.execute(Query)){
+                                           System.out.println(rootLogF+" is created  ");
+                                       }
                                        Query = "select * from "+rootFile+";";
                                        rs = st.executeQuery(Query);
                                        if(rs.next()){
 //                                           This Place for stack 
-                                             Query ="select operation,id,name,fname,path,type from "+rootLog+" inner join "+rootFolder+" on "+rootLog+".parentid = "+rootFolder+".fid;"; 
+int dcount =0;
+    HashMap<String,String> ids = new HashMap<String,String>();
+    while(dcount<2){                            
+        if(dcount!=1){
+        Query ="select operation,id,name,fname,path,type ,format from "+rootLog+" inner join "+rootFolder+" on "+rootLog+".parentid = "+rootFolder+".fid;"; 
+        }                                     
+        else{
+            
+            Query="select lid from "+rootLogF+" inner join "+rootFolder+" on "+rootLogF+".lid =="+rootFolder+".fid;";
+            ResultSet alp = st.executeQuery(Query);
+            while(alp.next()){
+                System.out.println(" string id "+alp.getString(1));
+                ids.put(alp.getString(1),"value");
+            }
+        Query ="select operation,id,name,fname,path,type ,format ,parentid from "+rootLog+" inner join "+rootLogF+" on "+rootLog+".parentid = ( select lid from "+rootLogF+" inner join "+rootFolder+" on "+rootLogF+".lid ="+rootFolder+".fid);"; 
+        }
+//           Query ="select operation,id,name,fname,path,type ,format from "+rootLog+" inner join "+rootFolder+" on "+rootLog+".parentid = "+rootFolder+".fid;"; 
 //                                             Query = "select id ,name ,parentid,fname,path,checksum from "+rootFile+" inner join "+rootFolder+" on "+rootFile+".parentid = "+rootFolder+".fid"+";";
 
                                              ResultSet rsp = st.executeQuery(Query);
@@ -587,8 +608,10 @@ public class FileCheckerClassUsingSQLite {
 //                                                                for(String sp : rest){
 //                                                                    System.out.println(" r split "+sp);
 //                                                                }
-//                                                                    System.out.println(" operation "+rsp.getString(1)+" id "+rsp.getString(2)+" name "+rsp.getString(3)+" path "+rsp.getString(5)+"\\"+rsp.getString(4)+" type "+rsp.getString(6));
+                                                                                        
+                                                                    System.out.println(" operation "+rsp.getString(1)+" id "+rsp.getString(2)+" name "+rsp.getString(3)+" path "+rsp.getString(5)+"\\"+rsp.getString(4)+" type "+rsp.getString(6)+" count "+dcount);
                                                                   if(rsp.getString(1).equalsIgnoreCase("created") || rsp.getString(1).equalsIgnoreCase("modified") || rsp.getString(1).equalsIgnoreCase("deleted")){
+                                                                     if(dcount==0){
                                                                       CrModDeOperations obj = new CrModDeOperations();
                                                                       obj.setOperation(rsp.getString(1));
                                                                       obj.setId(rsp.getString(2));
@@ -596,7 +619,14 @@ public class FileCheckerClassUsingSQLite {
                                                                       
                                                                       obj.setPlace(rsp.getString(5)+"\\"+rsp.getString(4));
                                                                       obj.setType(rsp.getString(6));
-                                                                      cmdList.add(obj);
+                                                                      if(rsp.getString(7)==null){
+                                                                      obj.setFormat("Folder");
+                                                                      }
+                                                                      else{
+                                                                      obj.setFormat(rsp.getString(7));
+                                                                      }
+//                                                                      obj.setFormat("dfile");
+                                                                        cmdList.add(obj);
                                                                       
                                                                       if(rsp.getString(1).equalsIgnoreCase("created")){
                                                                           creCount++;
@@ -607,6 +637,34 @@ public class FileCheckerClassUsingSQLite {
                                                                       else if(rsp.getString(1).equalsIgnoreCase("deleted")){
                                                                           deCount++;
                                                                       } 
+                                                                  }
+                                                                     else if(!ids.containsKey(rsp.getString(8))){
+                                                                          CrModDeOperations obj = new CrModDeOperations();
+                                                                      obj.setOperation(rsp.getString(1));
+                                                                      obj.setId(rsp.getString(2));
+                                                                      obj.setName(rsp.getString(3));
+                                                                      
+                                                                      obj.setPlace(rsp.getString(5)+"\\"+rsp.getString(4));
+                                                                      obj.setType(rsp.getString(6));
+                                                                      if(rsp.getString(7)==null){
+                                                                      obj.setFormat("Folder");
+                                                                      }
+                                                                      else{
+                                                                      obj.setFormat(rsp.getString(7));
+                                                                      }
+//                                                                      obj.setFormat("dfile");
+                                                                        cmdList.add(obj);
+                                                                      
+                                                                      if(rsp.getString(1).equalsIgnoreCase("created")){
+                                                                          creCount++;
+                                                                      }
+                                                                      else if(rsp.getString(1).equalsIgnoreCase("modified")){
+                                                                          modCount++;
+                                                                      }
+                                                                      else if(rsp.getString(1).equalsIgnoreCase("deleted")){
+                                                                          deCount++;
+                                                                      }
+                                                                     }
                                                                   }  
                                                                   else if(rsp.getString(1).equalsIgnoreCase("moved")){
                                                                       MoveOperation obj = new MoveOperation();
@@ -631,6 +689,9 @@ public class FileCheckerClassUsingSQLite {
 
 						                 
 						            }
+    dcount++;
+        System.out.println("");
+    }
                                                                 ////////// Initial display /////////////
   
                                                                  System.out.println("\t\tStack of This File ");   
@@ -692,7 +753,7 @@ public class FileCheckerClassUsingSQLite {
 //                                    }
                                                             
 //                                            here we data verification for the file and folder's
-                                            Query = "select id ,name ,parentid,fname,path,checksum from "+rootFile+" inner join "+rootFolder+" on "+rootFile+".parentid = "+rootFolder+".fid"+";";
+                                            Query = "select id ,name ,parentid,fname,path,checksum,format from "+rootFile+" inner join "+rootFolder+" on "+rootFile+".parentid = "+rootFolder+".fid"+";";
                                             ResultSet rsf = st.executeQuery(Query);
                                             
                                             System.out.println("file properites \n");
@@ -705,7 +766,7 @@ public class FileCheckerClassUsingSQLite {
 						                fpObj.setParentName(rsf.getString(5)+"\\"+rsf.getString(4));
 						                fpObj.setParentObj(rsf.getString(3));
 						                fpObj.setLastModified(rsf.getString(6));
-
+                                                                fpObj.setFileFormat(rsf.getString(7));
 						                hashMap1.put(rsf.getString(1),fpObj);
  
  
@@ -772,7 +833,7 @@ public class FileCheckerClassUsingSQLite {
 //                                                                                    dataString ="Moved|"+key+"|"+fpObje.getName()+"|"+fpObj.getParentName()+"|"+fpObje.getParentName()+"|File\n";
                                                                                      st.executeUpdate(Query);
                                                                                      
-                                                                                     Query = "insert into "+rootLog+" (operation, id, name, parentid,type) values ('Moved','"+key+"','"+fpObje.getName()+"','"+fpObje.getParentObj()+"','File');";
+                                                                                     Query = "insert into "+rootLog+" (operation, id, name, parentid,type,format) values ('Moved','"+key+"','"+fpObje.getName()+"','"+fpObje.getParentObj()+"','File','"+fpObje.getFileFormat()+"');";
                                                                                             st.execute(Query);
                                                                                     }
                                                                                     moList.add(result);
@@ -802,7 +863,7 @@ public class FileCheckerClassUsingSQLite {
                                                                                         result=fpObj.getName()+" (File) \t"+fpObje.getName()+"\t"+fpObje.getParentName();
                                                                                         Query = "update "+rootFile+" set name = '"+fpObje.getName()+"' where id = '"+key+"';";
                                                                                         st.executeUpdate(Query);
-                                                                                        Query = "insert into "+rootLog+" (operation, id, name, parentid,type) values ('Renamed','"+key+"','"+fpObje.getName()+"','"+fpObje.getParentObj()+"','File');";
+                                                                                        Query = "insert into "+rootLog+" (operation, id, name, parentid,type,format) values ('Renamed','"+key+"','"+fpObje.getName()+"','"+fpObje.getParentObj()+"','File','"+fpObje.getFileFormat()+"');";
                                                                                             st.execute(Query);
 //                                                                                    dataString="renamed|"+key+"|"+fpObj.getName()+"|"+fpObje.getName()+"|"+fpObje.getParentName()+"|File\n";
                                                                                     }
@@ -826,7 +887,7 @@ public class FileCheckerClassUsingSQLite {
 //                                                                                        dlist.add(dataString);
                                                                                            Query = "update "+rootFile+" set checksum ='"+fpObje.getLastModified()+"' where id ='"+key+"';";
                                                                                            st.executeUpdate(Query);
-                                                                                           Query = "insert into "+rootLog+" (operation, id, name, parentid,type) values ('Modified','"+key+"','"+fpObje.getName()+"','"+fpObje.getParentObj()+"','File');";
+                                                                                           Query = "insert into "+rootLog+" (operation, id, name, parentid,type,format) values ('Modified','"+key+"','"+fpObje.getName()+"','"+fpObje.getParentObj()+"','File','"+fpObje.getFileFormat()+"');";
                                                                                             st.execute(Query);
                                                                                         System.out.println("last data "+fpObj.getLastModified()+"\nnew data "+fpObje.getLastModified());
 //						            				System.out.println(" "+fpObje.getName()+" is Modified in "+fpObj.getParentName()+" this directory ");
@@ -856,9 +917,9 @@ public class FileCheckerClassUsingSQLite {
                                                                             }
                                                                             else{
                                                                                 result=fpObje.getName()+" (File) \t"+fpObje.getParentName();
-                                                                                Query = "insert into "+rootFile+" values('"+key+"','"+fpObje.getName()+"','"+fpObje.getParentObj()+"','"+fpObje.getLastModified()+"');";
+                                                                                Query = "insert into "+rootFile+" values('"+key+"','"+fpObje.getName()+"','"+fpObje.getParentObj()+"','"+fpObje.getLastModified()+"','"+fpObje.getFileFormat()+"');";
                                                                                 st.execute(Query);
-                                                                                Query = "insert into "+rootLog+" (operation, id, name, parentid,type) values ('Created','"+key+"','"+fpObje.getName()+"','"+fpObje.getParentObj()+"','File');";
+                                                                                Query = "insert into "+rootLog+" (operation, id, name, parentid,type,format) values ('Created','"+key+"','"+fpObje.getName()+"','"+fpObje.getParentObj()+"','File','"+fpObje.getFileFormat()+"');";
                                                                                             st.execute(Query);
 //                                                                                dataString = "created|"+key+"|"+fpObje.getName()+"|"+fpObje.getParentName()+"|File|"+fpObje.getCreatedTime()+"\n";
                                                                             }
@@ -888,9 +949,9 @@ public class FileCheckerClassUsingSQLite {
                                                else{
                                                    System.out.println("insert in the else file ");
 //                                                   for File table insertion
-                                                  Query = "insert into "+rootFile+" values('"+key+"','"+obj.getName()+"','"+obj.getParentObj()+"','"+obj.getLastModified()+"');";
+                                                  Query = "insert into "+rootFile+" values('"+key+"','"+obj.getName()+"','"+obj.getParentObj()+"','"+obj.getLastModified()+"','"+obj.getFileFormat()+"');";
                                                   st.execute(Query); 
-                                                  Query = "insert into "+rootLog+" (operation, id, name, parentid,type) values ('exist','"+key+"','"+obj.getName()+"','"+obj.getParentObj()+"','Folder');";
+                                                  Query = "insert into "+rootLog+" (operation, id, name, parentid,type,format) values ('exist','"+key+"','"+obj.getName()+"','"+obj.getParentObj()+"','File','"+obj.getFileFormat()+"');";
                                                      st.execute(Query);
                                                }
                                            }
@@ -900,6 +961,28 @@ public class FileCheckerClassUsingSQLite {
                                    catch(Exception e){
                                        System.out.println(" Error "+e.toString());
                                    }
+                                   
+                                   
+                                   
+                                   
+                                   
+                                   
+                                   
+                                   
+                                   
+                                   
+                                   
+                                   
+                                   
+                                   
+                                   
+                                   
+                                   
+                                   
+                                   
+                                   
+                                   
+                                   
                                    
  
 			////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -954,11 +1037,20 @@ public class FileCheckerClassUsingSQLite {
                                                                 }
                                                               for (String key  : hashMap1.keySet() ) {	
 						            	fpObje = hashMap1.get(key);
-                                                                if(fpObje.getLastModified().equals("Folder")){
+                                                                 
+//                                                                if(del==false){
+                                                                    if(fpObje.getLastModified().equals("Folder")){
                                                                     System.out.println(fpObje.getName()+" (Folder) \t"+fpObje.getParentName());
                                                                     Query = "delete from "+rootFolder+" where fid='"+key+"';";
                                                                     st.execute(Query);
-                                                                    Query = "insert into "+rootLog+" (operation, id, name, parentid,type) values ('Deleted','"+key+"','"+fpObje.getName()+"','"+fpObje.getParentObj()+"','Folder');";
+                                                                    
+                                                                    Query ="select lid  from "+rootLogF+" where lid='"+key+"'";
+                                                                    ResultSet rps = st.executeQuery(Query);
+                                                                    if(!rps.next()){
+                                                                    Query = "insert into "+rootLogF+" values('"+key+"','"+fpObje.getName()+"','"+fpObje.getParentObj()+"','"+fpObje.getParentName()+"');";
+                                                                       st.execute(Query);
+                                                                    }
+                                                                       Query = "insert into "+rootLog+" (operation, id, name, parentid,type) values ('Deleted','"+key+"','"+fpObje.getName()+"','"+fpObje.getParentObj()+"','Folder');";
                                                                                             st.execute(Query);
 //                                                                    dataString ="deleted|"+key+"|"+fpObje.getName()+"|"+fpObje.getParentName()+"|Folder\n";
                                                                 }
@@ -970,8 +1062,12 @@ public class FileCheckerClassUsingSQLite {
                                                                                             st.execute(Query);
 //                                                                dataString ="deleted|"+key+"|"+fpObje.getName()+"|"+fpObje.getParentName()+"|File\n";
                                                                 }
-//						            	dlist.add(dataString);
-						            }
+                                                                }
+                                                                 
+                                                                
+//                                                                lrsp.close();
+//                                                              }
+                                                              
                                                             ///////// Place for Log file Creating for the folder given by somesh on july 
                
                                                             

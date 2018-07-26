@@ -20,6 +20,7 @@ public class TypedetectionMod {
 private  HashMap<String,String> mimeType = new  HashMap<String,String>();
 ////////////// This is for insert the Type of mime Following
   public  TypedetectionMod(){
+       
         mimeType.put("text/plain", "text");
         mimeType.put("application/java-archive", "jar");
         mimeType.put("application/vnd.android.package-archive","jar");
@@ -52,6 +53,7 @@ private  HashMap<String,String> mimeType = new  HashMap<String,String>();
         mimeType.put("application/x-pdf","PDF");    
         mimeType.put("application/pgp","pgp");
         mimeType.put("application/pgp-encrypted","pgp");
+        mimeType.put("application/x-msdownload;format=pe32",".exe file");
         mimeType.put("application/pgp-signature","Signature"); 
         mimeType.put("application/pics-rules","pic-rules");
         mimeType.put("application/timestamped-data","Time-data");
@@ -59,6 +61,32 @@ private  HashMap<String,String> mimeType = new  HashMap<String,String>();
         mimeType.put("application/vnd.ms-wordml","Word-doc");
         mimeType.put("application/vnd.ms-word2006ml","Word-xml");
         mimeType.put("application/sereal","Serializable");
+        mimeType.put("application/x-sqlite3","sqlite db"); 
+        mimeType.put("application/xml","xml file ");
+        mimeType.put("application/xml-dtd","XML Document Type Definition");
+        mimeType.put("application/xslt+xml","extended style sheet");
+        mimeType.put("application/zlib","compress zip lib"); 
+        mimeType.put("application/x-7z-compressed","7zip archive ");
+        mimeType.put("application/x-webarchive","Web archive File"); 
+        mimeType.put("application/x-tar","POSIX archive");
+        mimeType.put("application/x-stata-dta","Stata DTA Dataset");
+        mimeType.put("application/x-shockwave-flash","Adobe Flash Player");
+        mimeType.put("application/x-silverlight-app","silver light app");
+        mimeType.put("application/x-sh","UNIX/LINUX Shell Script");
+        mimeType.put("application/x-sc","spreadsheet");
+        mimeType.put("application/x-sas-xport","sas Export format");
+        
+        mimeType.put("application/x-sas-backup","sas Backup");
+        mimeType.put("application/x-sas-putility","SAS Permanent Utility");
+        mimeType.put("application/x-sas-utility","SAS Utility");
+        mimeType.put("application/x-sas-transport","sas Transport File");
+        mimeType.put("application/x-stata-do","Stata DTA Script");
+        mimeType.put("application/x-vmdk","Virtual Disk Format");
+        mimeType.put("application/x-vhd","Virtual PC Virtual Hard Disk");
+        mimeType.put("application/x-tika-msoffice-embedded;format=ole10_native","OLE10 Native Embedded Document");
+        mimeType.put("application/x-tika-ooxml-protected","Password Protected OOXML File");
+        mimeType.put("application/x-tika-msworks-spreadsheet","SpreadSheet");
+        mimeType.put("application/x-tika-msoffice-embedded;format=comp_obj","CompObj OLE2 Embedded document");
         mimeType.put("application/sereal;version=1","Serializable");
         mimeType.put("application/sereal;version=2","Serializable");        
         mimeType.put("application/sereal;version=3","Serializable"); 
@@ -144,8 +172,9 @@ private  HashMap<String,String> mimeType = new  HashMap<String,String>();
         mimeType.put("image/x-emf","Enhanced Metafile");
         mimeType.put("application/x-emf","Enhanced Metafile");
         mimeType.put("image/x-emf-compressed","Compressed Enhanced Metafile");
-          
-          mimeType.put("application/x-ms-emz","Compressed Enhanced Metafile");
+        mimeType.put("application/x-msdownload",".dll or .com");
+        mimeType.put("application/x-7z-compressed", "7zip compressed");
+        mimeType.put("application/x-ms-emz","Compressed Enhanced Metafile");
         mimeType.put("image/fits", "Fits");
         mimeType.put("image/g3fax","fax image");
         mimeType.put("image/gif","Graphics Interchange Format");
@@ -200,16 +229,6 @@ private  HashMap<String,String> mimeType = new  HashMap<String,String>();
         mimeType.put("audio/x-wav","wave audio file");
         mimeType.put("audio/wav","wave audio file");
         
-        
-        
-        
-        
-        
-        
-        
-        
-        
-                
         
 }
   public String fileType(File file) throws IOException{

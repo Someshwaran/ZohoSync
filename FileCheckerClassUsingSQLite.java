@@ -35,6 +35,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import org.Kernel32;
 //import sun.misc.IOUtils;
@@ -351,10 +352,21 @@ public class FileCheckerClassUsingSQLite {
                                     Query = " select max(sno) from "+rootLog+" where id ='"+obj.getId()+"';";
                                     int max = Integer.parseInt(st.executeQuery(Query).getString(1));
                                     Query = "select max(sno), parentid from "+rootLog+" where sno <"+max+" and id ='"+obj.getId()+"';";
+                                    int max2 = Integer.parseInt(st.executeQuery(Query).getString(1));
                                     String parentid = st.executeQuery(Query).getString(2);
                                     Query = " select fname , path from "+rootFolder+" where fid ='"+parentid+"';";
                                     ResultSet rp = st.executeQuery(Query);
-                                    obj.setFrom(rp.getString(2)+"\\"+rp.getString(1));
+                                    if(rp.next()){
+                                        obj.setFrom(rp.getString(2)+"\\"+rp.getString(1));
+                                    }
+                                    else{
+                                             Query = "select max(sno), parentid from "+rootLog+" where sno <"+max2+" and id ='"+obj.getId()+"';";
+                                             parentid = st.executeQuery(Query).getString(2);
+                                            Query = " select fname , path from "+rootLogF+" where lid ='"+parentid+"';";
+                                            rp = st.executeQuery(Query);
+                                            obj.setFrom(rp.getString(2)+"\\"+rp.getString(1));
+                                    }
+                                    
                                     }
                                     System.out.println(obj.getName()+" "+obj.getFrom()+" "+obj.getTo()+" \t\t"+obj.getType());
                                       fileId.add(obj.getId());                                      
@@ -580,6 +592,14 @@ public class FileCheckerClassUsingSQLite {
                                        rs = st.executeQuery(Query);
                                        if(rs.next()){
 //                                           This Place for stack 
+Query =" select id from "+rootLog+";";
+ResultSet tem = st.executeQuery(Query);
+TreeMap<String,String> tMap = new TreeMap<String,String>();
+while(tem.next()){
+    tMap.put(tem.getString(1), "value");
+}
+
+
 int dcount =0;
     HashMap<String,String> ids = new HashMap<String,String>();
     while(dcount<2){                            
@@ -588,18 +608,21 @@ int dcount =0;
         }                                     
         else{
             
-            Query="select lid from "+rootLogF+" inner join "+rootFolder+" on "+rootLogF+".lid =="+rootFolder+".fid;";
-            ResultSet alp = st.executeQuery(Query);
-            while(alp.next()){
-                System.out.println(" string id "+alp.getString(1));
-                ids.put(alp.getString(1),"value");
-            }
-        Query ="select operation,id,name,fname,path,type ,format ,parentid from "+rootLog+" inner join "+rootLogF+" on "+rootLog+".parentid = ( select lid from "+rootLogF+" inner join "+rootFolder+" on "+rootLogF+".lid ="+rootFolder+".fid);"; 
+//            Query="select lid from "+rootLogF+" inner join "+rootFolder+" on "+rootLogF+".lid =="+rootFolder+".fid;";
+//            ResultSet alp = st.executeQuery(Query);
+//            while(alp.next()){
+//                System.out.println(" string id "+alp.getString(1));
+//                ids.put(alp.getString(1),"value");
+//            }
+//            System.out.println(" size ids "+ids.size()+" ");
+        Query ="select operation,id,name,fname,path,type ,format ,parentid from "+rootLog+" inner join "+rootLogF+" on "+rootLog+".parentid ="+rootLogF+".lid;";
+//                + " ( select lid from "+rootLogF+" inner join "+rootFolder+" on "+rootLogF+".lid ="+rootFolder+".fid);"; 
         }
 //           Query ="select operation,id,name,fname,path,type ,format from "+rootLog+" inner join "+rootFolder+" on "+rootLog+".parentid = "+rootFolder+".fid;"; 
 //                                             Query = "select id ,name ,parentid,fname,path,checksum from "+rootFile+" inner join "+rootFolder+" on "+rootFile+".parentid = "+rootFolder+".fid"+";";
 
                                              ResultSet rsp = st.executeQuery(Query);
+                                                     
 //                                         bufferedReader = new BufferedReader(new FileReader(ldataFile));
 							    	String readLine="";
 							    	while (rsp.next()) {
@@ -609,9 +632,10 @@ int dcount =0;
 //                                                                    System.out.println(" r split "+sp);
 //                                                                }
                                                                                         
-                                                                    System.out.println(" operation "+rsp.getString(1)+" id "+rsp.getString(2)+" name "+rsp.getString(3)+" path "+rsp.getString(5)+"\\"+rsp.getString(4)+" type "+rsp.getString(6)+" count "+dcount);
+                                                                   
                                                                   if(rsp.getString(1).equalsIgnoreCase("created") || rsp.getString(1).equalsIgnoreCase("modified") || rsp.getString(1).equalsIgnoreCase("deleted")){
-                                                                     if(dcount==0){
+//                                                                      System.out.println(" operation "+rsp.getString(1)+" id "+rsp.getString(2)+" name "+rsp.getString(3)+" path "+rsp.getString(5)+"\\"+rsp.getString(4)+" type "+rsp.getString(6)+" count "+dcount+" "+rsp.getString(7));
+                                                                      if(dcount==0){
                                                                       CrModDeOperations obj = new CrModDeOperations();
                                                                       obj.setOperation(rsp.getString(1));
                                                                       obj.setId(rsp.getString(2));
@@ -636,10 +660,17 @@ int dcount =0;
                                                                       }
                                                                       else if(rsp.getString(1).equalsIgnoreCase("deleted")){
                                                                           deCount++;
-                                                                      } 
+                                                                      }
+                                                                         if (tMap.containsKey(rsp.getString(2))) {
+                                                                             tMap.remove(rsp.getString(2));
+                                                                         }
                                                                   }
-                                                                     else if(!ids.containsKey(rsp.getString(8))){
-                                                                          CrModDeOperations obj = new CrModDeOperations();
+                                                                     else {
+//                                                                         (!ids.containsKey(rsp.getString(8)))
+// System.out.println(" operation "+rsp.getString(1)+" id "+rsp.getString(2)+" name "+rsp.getString(3)+" path "+rsp.getString(5)+"\\"+rsp.getString(4)+" type "+rsp.getString(6)+" count "+dcount+" "+rsp.getString(8));
+                                                                            if(tMap.containsKey(rsp.getString(2))){
+                                                                        
+                                                                         CrModDeOperations obj = new CrModDeOperations();
                                                                       obj.setOperation(rsp.getString(1));
                                                                       obj.setId(rsp.getString(2));
                                                                       obj.setName(rsp.getString(3));
@@ -664,6 +695,7 @@ int dcount =0;
                                                                       else if(rsp.getString(1).equalsIgnoreCase("deleted")){
                                                                           deCount++;
                                                                       }
+                                                                     }
                                                                      }
                                                                   }  
                                                                   else if(rsp.getString(1).equalsIgnoreCase("moved")){
@@ -756,9 +788,9 @@ int dcount =0;
                                             Query = "select id ,name ,parentid,fname,path,checksum,format from "+rootFile+" inner join "+rootFolder+" on "+rootFile+".parentid = "+rootFolder+".fid"+";";
                                             ResultSet rsf = st.executeQuery(Query);
                                             
-                                            System.out.println("file properites \n");
+//                                            System.out.println("file properites \n");
                                             while(rsf.next()){                                                
-                                                System.out.println(" file "+rsf.getString(1)+" "+rsf.getString(2)+" "+rsf.getString(3)+" "+rsf.getString(4)+" "+rsf.getString(5)+" "+rsf.getString(6));
+//                                                System.out.println(" file "+rsf.getString(1)+" "+rsf.getString(2)+" "+rsf.getString(3)+" "+rsf.getString(4)+" "+rsf.getString(5)+" "+rsf.getString(6));
  
 //                                                /////////// put the data in the hashmap 1
                                                 fpObj = new FileProperties();
@@ -777,10 +809,10 @@ int dcount =0;
                                            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                                               Query = "select * from "+rootFolder+";";
                                             ResultSet rsfol = st.executeQuery(Query);
-                                            System.out.println("\n folder properties ");
+//                                            System.out.println("\n folder properties ");
                                             while(rsfol.next())
                                             {
-                                                System.out.println(" folder "+rsfol.getString(1)+" "+rsfol.getString(2)+" "+rsfol.getString(3)+" "+rsfol.getString(4));
+//                                                System.out.println(" folder "+rsfol.getString(1)+" "+rsfol.getString(2)+" "+rsfol.getString(3)+" "+rsfol.getString(4));
                                                  /////////// put the data in the hashmap 1
                                                 
                                                  fpObj = new FileProperties();
@@ -936,7 +968,7 @@ int dcount =0;
                                          
                                            for(String key : hashMap2.keySet()){
                                                FileProperties obj = hashMap2.get(key);
-                                                 System.out.println("key "+key+" name : "+obj.getName()+" parent id  : "+obj.getParentObj()+" parent path :"+obj.getParentName()+" check sum "+obj.getLastModified());
+//                                                 System.out.println("key "+key+" name : "+obj.getName()+" parent id  : "+obj.getParentObj()+" parent path :"+obj.getParentName()+" check sum "+obj.getLastModified());
                                                if(obj.getLastModified().equalsIgnoreCase("folder")){
 //                                                for Folder table insertion 
                                                    System.out.println("inside the Folder if ");
